@@ -82,7 +82,7 @@ function LandingPage() {
 
         <section
           aria-labelledby="preview-heading"
-          className="mx-auto w-full max-w-2xl px-4 pb-20"
+          className="mx-auto w-full max-w-2xl px-4 pb-8"
         >
           <h2
             id="preview-heading"
@@ -99,6 +99,10 @@ function LandingPage() {
             ))}
           </div>
         </section>
+
+        <p className="mx-auto w-full max-w-2xl px-4 pb-16 text-center text-sm text-muted-foreground">
+          Built by Jiří Hajek
+        </p>
       </main>
     </>
   )
