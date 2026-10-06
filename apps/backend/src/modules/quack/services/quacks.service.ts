@@ -7,8 +7,11 @@ import { Injectable } from '@nestjs/common';
 export class QuacksService {
   constructor(private readonly quackRepository: QuackRepository) {}
 
-  async getQuacks(): Promise<Quack[]> {
-    return this.quackRepository.getQuacks();
+  async getQuacks(filter: { search?: string } = {}): Promise<Quack[]> {
+    // People search for authors the way the feed shows them — "@BreadCritic" —
+    // so a leading @ is dropped and the rest matches the username.
+    const search = filter.search?.trim().replace(/^@/, '');
+    return this.quackRepository.getQuacks({ search: search || undefined });
   }
 
   async createQuack(

@@ -37,6 +37,17 @@ describe("QuackList", () => {
     expect(screen.queryByText(/Mood:/)).not.toBeInTheDocument()
   })
 
+  it("explains an empty result with the given message", () => {
+    render(
+      <QuackList
+        quacks={[]}
+        emptyMessage="No quacks match “heron”."
+      />,
+    )
+
+    expect(screen.getByText("No quacks match “heron”.")).toBeInTheDocument()
+  })
+
   it("shows an error with a working reload button", async () => {
     const onReload = vi.fn()
     render(
