@@ -5,9 +5,11 @@ import { AuthenticatedUserGuard } from '@/shared/auth/guards/authenticated-user.
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Query,
   UseGuards,
@@ -40,12 +42,19 @@ export class QuacksController {
 
   @Get()
   @ApiOperation({
-    summary: 'List quacks, optionally filtered by a search term',
+    summary:
+      'List quacks, optionally only your own and/or filtered by a search term',
   })
   @ApiResponse({ status: 200, type: [QuackResponseDto] })
   @ApiResponse({ status: 401, description: 'Not signed in' })
-  async list(@Query() query: ListQuacksQueryDto): Promise<QuackResponseDto[]> {
-    const quacks = await this.quacksService.getQuacks({ search: query.search });
+  async list(
+    @User() user: Identity,
+    @Query() query: ListQuacksQueryDto,
+  ): Promise<QuackResponseDto[]> {
+    const quacks = await this.quacksService.getQuacks({
+      search: query.search,
+      authorId: query.mine ? user.id : undefined,
+    });
     return quacks.map(QuackResponseDto.fromDomain);
   }
 
@@ -63,5 +72,19 @@ export class QuacksController {
       mood: body.mood,
     });
     return QuackResponseDto.fromDomain(quack);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete one of your own quacks' })
+  @ApiResponse({ status: 204, description: 'Deleted' })
+  @ApiResponse({ status: 401, description: 'Not signed in' })
+  @ApiResponse({
+    status: 403,
+    description: 'The quack belongs to someone else',
+  })
+  @ApiResponse({ status: 404, description: 'No quack with this id' })
+  async delete(@User() user: Identity, @Param('id') id: string): Promise<void> {
+    await this.quacksService.deleteQuack(user, id);
   }
 }

@@ -1,4 +1,5 @@
 // Example component test — the pattern to copy for your own components.
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
@@ -63,5 +64,46 @@ describe("QuackList", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /reload/i }))
     expect(onReload).toHaveBeenCalledOnce()
+  })
+
+  it("offers delete only on the signed-in user's own quacks", () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <QuackList
+          quacks={[
+            quack({ id: "mine", text: "my quack", userId: "u1" }),
+            quack({
+              id: "theirs",
+              text: "their quack",
+              userId: "u2",
+              user: { id: "u2", name: "Bread Critic", username: "BreadCritic" },
+            }),
+          ]}
+          currentUserId="u1"
+        />
+      </QueryClientProvider>,
+    )
+
+    const deleteButton = screen.getByRole("button", { name: "Delete quack" })
+    expect(screen.getByText("my quack").closest("article")).toContainElement(deleteButton)
+  })
+
+  it("offers no delete at all without a signed-in user", () => {
+    render(<QuackList quacks={[quack()]} />)
+
+    expect(screen.queryByRole("button", { name: "Delete quack" })).not.toBeInTheDocument()
+  })
+
+  it("shows an action under the empty message", () => {
+    render(
+      <QuackList
+        quacks={[]}
+        emptyMessage="You haven't quacked yet."
+        emptyAction={<button type="button">Write your first quack</button>}
+      />,
+    )
+
+    expect(screen.getByText("You haven't quacked yet.")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Write your first quack" })).toBeInTheDocument()
   })
 })

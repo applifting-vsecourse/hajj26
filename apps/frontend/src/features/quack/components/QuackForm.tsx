@@ -1,3 +1,4 @@
+import type { Ref } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
 import { useForm, useWatch } from "react-hook-form"
@@ -21,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { cn } from "@/lib/utils"
+import { cn, mergeRefs } from "@/lib/utils"
 
 import { quackMoodSchema } from "@/features/quack/api/quackSchemas"
 import { moodOptions } from "@/features/quack/components/moods"
@@ -46,9 +47,13 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>
 
-type QuackFormProps = { className?: string }
+type QuackFormProps = {
+  className?: string
+  // Lets the page move focus into the text field, e.g. from an empty state.
+  textareaRef?: Ref<HTMLTextAreaElement>
+}
 
-export function QuackForm({ className }: QuackFormProps) {
+export function QuackForm({ className, textareaRef }: QuackFormProps) {
   const addQuack = useAddQuack()
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -91,6 +96,7 @@ export function QuackForm({ className }: QuackFormProps) {
                     placeholder="Quack something..."
                     disabled={addQuack.isPending}
                     {...field}
+                    ref={mergeRefs(field.ref, textareaRef)}
                   />
                 </FormControl>
                 <FormMessage />

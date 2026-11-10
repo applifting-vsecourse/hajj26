@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class ListQuacksQueryDto {
   @ApiPropertyOptional({
@@ -16,4 +16,18 @@ export class ListQuacksQueryDto {
     typeof value === 'string' ? value.trim() : value,
   )
   search?: string;
+
+  @ApiPropertyOptional({
+    description: 'Only quacks written by the signed-in user',
+    type: Boolean,
+    example: true,
+  })
+  @IsOptional()
+  // Query strings arrive as text; only the literal "true"/"false" are accepted,
+  // anything else fails validation instead of being silently coerced.
+  @Transform(({ value }: { value: unknown }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
+  @IsBoolean()
+  mine?: boolean;
 }

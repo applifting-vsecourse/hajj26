@@ -32,20 +32,23 @@ const mapPrismaQuackToDomain = (
 export class QuackRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getQuacks(filter: { search?: string } = {}): Promise<Quack[]> {
-    const { search } = filter;
+  async getQuacks(
+    filter: { search?: string; authorId?: string } = {},
+  ): Promise<Quack[]> {
+    const { search, authorId } = filter;
     const quacks = await this.prisma.quack.findMany({
-      where: search
-        ? {
-            OR: [
+      where: {
+        userId: authorId,
+        OR: search
+          ? [
               { text: { contains: search, mode: 'insensitive' } },
               { user: { name: { contains: search, mode: 'insensitive' } } },
               {
                 user: { username: { contains: search, mode: 'insensitive' } },
               },
-            ],
-          }
-        : undefined,
+            ]
+          : undefined,
+      },
       include: { user: true },
       orderBy: { createdAt: 'desc' },
     });
@@ -66,5 +69,25 @@ export class QuackRepository {
       include: { user: true },
     });
     return mapPrismaQuackToDomain(quack);
+  }
+
+  async getQuackById(id: string): Promise<Quack | null> {
+    const quack = await this.prisma.quack.findUnique({ where: { id } });
+    return quack ? mapPrismaQuackToDomain(quack) : null;
+  }
+
+  /**
+   * Deletes the quack only if it belongs to `userId` — ownership is part of the
+   * WHERE clause, so there is no window between "check" and "delete".
+   * Returns whether a row was deleted.
+   */
+  async deleteOwnQuack(filter: {
+    id: string;
+    userId: string;
+  }): Promise<boolean> {
+    const { count } = await this.prisma.quack.deleteMany({
+      where: { id: filter.id, userId: filter.userId },
+    });
+    return count > 0;
   }
 }
