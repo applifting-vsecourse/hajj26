@@ -15,7 +15,7 @@ type QuackListProps = {
   emptyMessage?: string
   // Shown under the empty message, e.g. a nudge to write the first quack.
   emptyAction?: ReactNode
-  // The signed-in user — their own quacks get a delete action.
+  // The signed-in user — every quack gets a save action, their own a delete one.
   currentUserId?: string
 }
 
@@ -70,6 +70,7 @@ export function QuackList({
           key={quack.id}
           quack={quack}
           canDelete={currentUserId !== undefined && quack.userId === currentUserId}
+          canSave={currentUserId !== undefined}
         />
       ))}
     </div>

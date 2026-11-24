@@ -54,6 +54,8 @@ export class QuacksController {
     const quacks = await this.quacksService.getQuacks({
       search: query.search,
       authorId: query.mine ? user.id : undefined,
+      // isSaved is always about the reader in the session
+      viewerId: user.id,
     });
     return quacks.map(QuackResponseDto.fromDomain);
   }

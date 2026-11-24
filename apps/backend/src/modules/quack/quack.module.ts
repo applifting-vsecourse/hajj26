@@ -9,6 +9,6 @@ import { QuacksService } from './services/quacks.service';
   imports: [AuthModule, PrismaModule],
   controllers: [QuacksController],
   providers: [QuacksService, QuackRepository],
-  exports: [QuacksService],
+  exports: [QuacksService, QuackRepository],
 })
 export class QuackModule {}

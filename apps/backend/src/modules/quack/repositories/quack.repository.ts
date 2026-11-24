@@ -6,8 +6,8 @@ import {
 import { Quack, QuackMood } from '@/modules/quack/domain/quack';
 import { Injectable } from '@nestjs/common';
 
-const mapPrismaQuackToDomain = (
-  quack: PrismaQuack & { user?: PrismaUser },
+export const mapPrismaQuackToDomain = (
+  quack: PrismaQuack & { user?: PrismaUser; savedBy?: unknown[] },
 ): Quack => ({
   id: quack.id,
   text: quack.text,
@@ -22,6 +22,7 @@ const mapPrismaQuackToDomain = (
         username: quack.user.username ?? '',
       }
     : undefined,
+  isSaved: quack.savedBy ? quack.savedBy.length > 0 : undefined,
 });
 
 /**
@@ -32,10 +33,11 @@ const mapPrismaQuackToDomain = (
 export class QuackRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** `viewerId` marks each quack with whether that user has it saved (`isSaved`). */
   async getQuacks(
-    filter: { search?: string; authorId?: string } = {},
+    filter: { search?: string; authorId?: string; viewerId?: string } = {},
   ): Promise<Quack[]> {
-    const { search, authorId } = filter;
+    const { search, authorId, viewerId } = filter;
     const quacks = await this.prisma.quack.findMany({
       where: {
         userId: authorId,
@@ -49,7 +51,14 @@ export class QuackRepository {
             ]
           : undefined,
       },
-      include: { user: true },
+      include: {
+        user: true,
+        // At most one row: the viewer's own save, if any. Nobody else's saves
+        // are ever loaded.
+        savedBy: viewerId
+          ? { where: { userId: viewerId }, select: { userId: true } }
+          : false,
+      },
       orderBy: { createdAt: 'desc' },
     });
     return quacks.map(mapPrismaQuackToDomain);

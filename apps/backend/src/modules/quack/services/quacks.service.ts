@@ -12,7 +12,7 @@ export class QuacksService {
   constructor(private readonly quackRepository: QuackRepository) {}
 
   async getQuacks(
-    filter: { search?: string; authorId?: string } = {},
+    filter: { search?: string; authorId?: string; viewerId?: string } = {},
   ): Promise<Quack[]> {
     // People search for authors the way the feed shows them — "@BreadCritic" —
     // so a leading @ is dropped and the rest matches the username.
@@ -20,6 +20,7 @@ export class QuacksService {
     return this.quackRepository.getQuacks({
       search: search || undefined,
       authorId: filter.authorId,
+      viewerId: filter.viewerId,
     });
   }
 
