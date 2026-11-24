@@ -16,4 +16,6 @@ export type Quack = {
   createdAt: Date;
   updatedAt: Date;
   user?: QuackAuthor;
+  /** Whether the user reading the quack has it in their Saved; set only when a reader is known. */
+  isSaved?: boolean;
 };

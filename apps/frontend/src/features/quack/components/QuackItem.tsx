@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/date"
 import type { Quack } from "@/features/quack/api/quackSchemas"
 import { DeleteQuackButton } from "@/features/quack/components/DeleteQuackButton"
 import { QuackMoodBadge } from "@/features/quack/components/QuackMoodBadge"
+import { SaveQuackButton } from "@/features/quack/components/SaveQuackButton"
 import { UsersName } from "@/features/quack/components/UsersName"
 import { UsersUserName } from "@/features/quack/components/UsersUserName"
 
@@ -11,9 +12,11 @@ type QuackItemProps = {
   quack: Quack
   // Only the author gets the delete action; the server enforces the same rule.
   canDelete?: boolean
+  // Saving needs a signed-in user, so the bookmark shows only with one.
+  canSave?: boolean
 }
 
-export function QuackItem({ quack, canDelete = false }: QuackItemProps) {
+export function QuackItem({ quack, canDelete = false, canSave = false }: QuackItemProps) {
   const { name, username } = quack.user
 
   const initials = name
@@ -46,7 +49,10 @@ export function QuackItem({ quack, canDelete = false }: QuackItemProps) {
         <p className="text-sm break-words whitespace-pre-line">{quack.text}</p>
       </div>
 
-      {canDelete ? <DeleteQuackButton quack={quack} /> : null}
+      <div className="flex items-start gap-1">
+        {canSave ? <SaveQuackButton quack={quack} /> : null}
+        {canDelete ? <DeleteQuackButton quack={quack} /> : null}
+      </div>
     </article>
   )
 }

@@ -18,6 +18,8 @@ export const quackSchema = z.object({
   userId: z.string(),
   createdAt: z.coerce.date(),
   user: quackUserSchema,
+  // Whether the signed-in user has the quack in their Saved.
+  isSaved: z.boolean().optional(),
 })
 
 export const quacksSchema = z.array(quackSchema)

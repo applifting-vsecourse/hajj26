@@ -35,6 +35,11 @@ export class QuackResponseDto {
   @ApiProperty({ type: QuackUserDto })
   user!: QuackUserDto;
 
+  @ApiProperty({
+    description: 'Whether the signed-in user has this quack in their Saved',
+  })
+  isSaved!: boolean;
+
   static fromDomain(quack: Quack): QuackResponseDto {
     if (!quack.user) {
       throw new Error(
@@ -52,6 +57,7 @@ export class QuackResponseDto {
         name: quack.user.name,
         username: quack.user.username,
       },
+      isSaved: quack.isSaved ?? false,
     };
   }
 }

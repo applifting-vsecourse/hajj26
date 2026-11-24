@@ -6,6 +6,7 @@ export function HeaderNav() {
   return (
     <nav className="flex items-center gap-1">
       <HeaderNavLink to={ROUTES.quacks}>Quacks</HeaderNavLink>
+      <HeaderNavLink to={ROUTES.saved}>Saved</HeaderNavLink>
     </nav>
   )
 }

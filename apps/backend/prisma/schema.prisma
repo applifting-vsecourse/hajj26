@@ -39,9 +39,28 @@ model Quack {
   userId    String
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now()) @updatedAt
+  savedBy   SavedQuack[]
 
   @@index([userId])
   @@map("quack")
+}
+
+// A user's bookmark of a quack. Private: only the user who saved it reads it.
+// The composite key makes saving idempotent; deleting the quack or the user
+// removes the bookmark with it.
+model SavedQuack {
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  quack   Quack  @relation(fields: [quackId], references: [id], onDelete: Cascade)
+  quackId String
+  // Microsecond precision: Saved is ordered by this, and two saves in quick
+  // succession must not tie.
+  savedAt DateTime @default(now()) @db.Timestamp(6)
+
+  @@id([userId, quackId])
+  @@index([userId, savedAt])
+  @@index([quackId])
+  @@map("saved_quack")
 }
 
 model Session {
@@ -103,6 +122,7 @@ model User {
   sessions        Session[]
   accounts        Account[]
   quacks          Quack[]
+  savedQuacks     SavedQuack[]
   role            UserRole  @default(user)
 
   username        String? @db.VarChar(50)
